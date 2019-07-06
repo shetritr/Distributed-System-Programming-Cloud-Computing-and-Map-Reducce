@@ -18,9 +18,9 @@ import java.util.UUID;
 public class MainTest {
     public static void main(String[] args) throws IOException {
 
-        String input = "s3n://fortestrefael/input";
+        String input = "s3n://fortestrefael/input.txt";
         String output = "s3n://fortestrefael/output/";
-
+        UUID uuid = UUID.randomUUID();
         // get AWS credentials
         AWSCredentialsProvider credentialsProvider = new AWSStaticCredentialsProvider(new ProfileCredentialsProvider().getCredentials());
 
@@ -32,17 +32,25 @@ public class MainTest {
 
 
         HadoopJarStepConfig hadoopJarStep1 = new HadoopJarStepConfig()
-               .withJar("s3n://fortestrefael/samples-1.0.0.jar") // This should be a full map reduce application.
-                .withArgs(input, output);
+               .withJar("s3n://fortestrefael/Job1.jar") // This should be a full map reduce application.
+                .withArgs(input, output , uuid.toString());
 
         StepConfig stepConfig1 = new StepConfig()
                 .withName("step1")
                 .withHadoopJarStep(hadoopJarStep1)
                 .withActionOnFailure("TERMINATE_JOB_FLOW");
 
+        HadoopJarStepConfig hadoopJarStep2 = new HadoopJarStepConfig()
+                .withJar("s3n://fortestrefael/Job2.jar") // This should be a full map reduce application.
+                .withArgs(uuid.toString());
+
+        StepConfig stepConfig2 = new StepConfig()
+                .withName("step2")
+                .withHadoopJarStep(hadoopJarStep2)
+                .withActionOnFailure("TERMINATE_JOB_FLOW");
 
         JobFlowInstancesConfig instances = new JobFlowInstancesConfig()
-                .withInstanceCount(2)
+                .withInstanceCount(5)
                 .withMasterInstanceType(InstanceType.M1Xlarge.toString())
                 .withSlaveInstanceType(InstanceType.M1Xlarge.toString())
                 .withHadoopVersion("2.2.0")
@@ -51,10 +59,10 @@ public class MainTest {
                 .withPlacement(new PlacementType("us-east-1a"));
 
         RunJobFlowRequest runFlowRequest = new RunJobFlowRequest()
-                .withName("firstJob")
+                .withName("FirstJob")
                 .withReleaseLabel("emr-5.14.0")
                 .withInstances(instances)
-                .withSteps(stepConfig1)
+                .withSteps(stepConfig1,stepConfig2)
                 .withLogUri("s3n://fortestrefael/logs/")
                 .withJobFlowRole("EMR_EC2_DefaultRole")
                 .withServiceRole("EMR_DefaultRole");
