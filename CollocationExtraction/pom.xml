@@ -57,7 +57,7 @@
              <configuration>
                  <archive>
                      <manifest>
-                         <mainClass>Jobs.FirstJob</mainClass>
+                         <mainClass>Jobs.ThirdJob</mainClass>
                      </manifest>
                  </archive>
              </configuration>

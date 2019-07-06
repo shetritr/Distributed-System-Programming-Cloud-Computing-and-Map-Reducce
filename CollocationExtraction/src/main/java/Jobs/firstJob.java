@@ -61,8 +61,6 @@ public class FirstJob {
 
             //4
             context.write(new FirstJobKey(W1,W2,dec2),new LongWritable(count));
-
-
         }
     }
 
@@ -146,17 +144,14 @@ public class FirstJob {
 
     public static void main(String[] args) throws IOException, ClassNotFoundException, InterruptedException {
 
+        String add = args[0];
+        String input = args [1];
         String uuid = args[2];
-        String output = "s3n://fortestrefael/steps/" + uuid + "/Job1";
-        String TemPath ="fortestrefael/temp/" + uuid + "/Ns";
 
+        String output = "s3n://" + add + "/steps/" + uuid + "/Job1";
+        String TemPath =add +"/temp/" + uuid + "/Ns";
         Configuration conf = new Configuration();
         conf.set("TemPath", TemPath);
-        String [] otherArgs = new GenericOptionsParser(conf,args).getRemainingArgs();
-        if (otherArgs.length != 3){
-            System.err.println("Usage: FirstJob <input_file> <output_file> <uuid>");
-            System.exit(2);
-        }
         Job job = Job.getInstance(conf,"FirstJob");
         job.setJarByClass(FirstJob.class);//Jar class
         job.setPartitionerClass(firstPartitioner.class);
@@ -170,7 +165,7 @@ public class FirstJob {
         job.setOutputValueClass(FirstJobValue.class);
         job.setInputFormatClass(TextInputFormat.class);
 
-        FileInputFormat.addInputPath(job,new Path(otherArgs[0]));
+        FileInputFormat.addInputPath(job,new Path(input));
         FileOutputFormat.setOutputPath(job, new Path(output));
         boolean status = job.waitForCompletion(true);
         if(status){

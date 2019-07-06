@@ -81,10 +81,11 @@ public class SecondJob {
 
 
     public static void main(String[] args) throws IOException, ClassNotFoundException, InterruptedException {
-        String uuid = args[0];
-        String NsPath ="fortestrefael/temp/" + uuid + "/Ns";
-        String input = "s3n://fortestrefael/steps/" + uuid + "/Job1";
-        String output = "s3n://fortestrefael/steps/" + uuid + "/Job2";
+        String add = args[0];
+        String uuid = args[1];
+        String NsPath =add + "/temp/" + uuid + "/Ns";
+        String input = "s3n://"+add+"/steps/" + uuid + "/Job1";
+        String output = "s3n://"+add+"/steps/" + uuid + "/Job2";
 
         Configuration conf = new Configuration();
         conf.set("NsPath", NsPath);

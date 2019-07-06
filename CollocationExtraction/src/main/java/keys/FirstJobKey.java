@@ -5,9 +5,10 @@ import org.apache.hadoop.io.WritableComparable;
 
 import java.io.DataInput;
 import java.io.DataOutput;
+import java.io.File;
 import java.io.IOException;
 
-public class FirstJobKey implements WritableComparable<FirstJobKey> {
+public  class FirstJobKey implements WritableComparable<FirstJobKey> {
 
 
     private Text first ;
@@ -132,8 +133,10 @@ public class FirstJobKey implements WritableComparable<FirstJobKey> {
         return this.first.toString() + " " + this.second.toString() + " " + this.decide;
     }
 
-//    public static void main(String[] args) {
-//        FirstJobKey firstJobKey = new FirstJobKey("198" ,"a",)
+//    public static void main(String[] args) throws IOException {
+//        double a = 10/Math.log10(1);
+//        if (a > 1) a=1;
+//        System.out.println(a);
 //    }
 
 }
