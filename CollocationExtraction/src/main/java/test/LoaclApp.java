@@ -46,8 +46,8 @@ public class LoaclApp {
 
         //
         String credent = credentialsProvider.getCredentials().getAWSAccessKeyId();
-        String add = ("Refael-And-Mhor-"+credent).toLowerCase();
-        String input = "s3n://" + add + "/input.txt";
+        String add = ("Refael-And-Mhor-2-"+credent).toLowerCase();
+        String input ="s3://datasets.elasticmapreduce/ngrams/books/20090715/eng-us-all/2gram/data";// "s3n://" + add + "/input.txt";
 
         PutOnS3("uploads",add);
 
@@ -78,7 +78,7 @@ public class LoaclApp {
 
         HadoopJarStepConfig hadoopJarStep3 = new HadoopJarStepConfig()
                 .withJar("s3n://"+add+"/Job3.jar") // This should be a full map reduce application.
-                .withArgs(add,uuid.toString());
+                .withArgs(add,uuid.toString(),args[0],args[1]);
 
         StepConfig stepConfig3 = new StepConfig()
                 .withName("step3")

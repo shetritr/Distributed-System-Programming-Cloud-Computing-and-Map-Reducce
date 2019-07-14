@@ -33,7 +33,7 @@ public class SecondJob {
         protected void map(FirstJobKey key, FirstJobValue value, Context context) throws IOException, InterruptedException {
             String bucketName = context.getConfiguration().get("NsPath");
             S3Object object = s3.getObject(new GetObjectRequest(bucketName, String.valueOf(key.getDecide())));
-            int N_dec = readTextInputStream(object.getObjectContent());
+            long N_dec = readTextInputStream(object.getObjectContent());
             // now switch (w1,w2) => (w2,w1) ,for sorting by w2
             if(key.getFirst().toString().equals(asr)){  // when (*,w2)
                 context.write(new FirstJobKey(key.getSecond().toString(),key.getFirst().toString(),key.getDecide()),new SecondJobValueMapper(value.getCW1N()));
@@ -99,6 +99,8 @@ public class SecondJob {
         job.setOutputKeyClass(FirstJobKey.class);
         job.setOutputValueClass(SecondJobValueReduce.class);
         job.setInputFormatClass(SecondJobInputFormat.class);
+        job.setInputFormatClass(SecondJobInputFormat.class);
+
         FileInputFormat.addInputPath(job,new Path(input));
         FileOutputFormat.setOutputPath(job, new Path(output));
         boolean status = job.waitForCompletion(true);
@@ -108,12 +110,12 @@ public class SecondJob {
             System.exit(1);
         }
     }
-    private static int readTextInputStream(InputStream input) throws IOException {
+    private static long readTextInputStream(InputStream input) throws IOException {
         BufferedReader reader = new BufferedReader(new InputStreamReader(input));
         while (true) {
             String line = reader.readLine();
             if (line == null) break;
-            return  Integer.parseInt(line);
+            return  Long.parseLong(line);
         }
         return 0;
     }

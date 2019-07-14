@@ -16,6 +16,7 @@ import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.Partitioner;
 import org.apache.hadoop.mapreduce.Reducer;
 import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
+import org.apache.hadoop.mapreduce.lib.input.SequenceFileInputFormat;
 import org.apache.hadoop.mapreduce.lib.input.TextInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 import org.apache.hadoop.util.GenericOptionsParser;
@@ -163,7 +164,7 @@ public class FirstJob {
         job.setMapOutputValueClass(LongWritable.class);
         job.setOutputKeyClass(FirstJobKey.class);
         job.setOutputValueClass(FirstJobValue.class);
-        job.setInputFormatClass(TextInputFormat.class);
+        job.setInputFormatClass(SequenceFileInputFormat.class);
 
         FileInputFormat.addInputPath(job,new Path(input));
         FileOutputFormat.setOutputPath(job, new Path(output));

@@ -13,6 +13,7 @@ public class ThirdJobKey implements WritableComparable<ThirdJobKey> {
     private Text first ;
     private Text second ;
     private int decide ;
+    private double pmi;
 
     private String asr = "*";
 
@@ -20,16 +21,18 @@ public class ThirdJobKey implements WritableComparable<ThirdJobKey> {
         this.first = new Text();
         this.second = new Text();
         decide = 0;
+        pmi = 0;
     }
 
-    public ThirdJobKey(String first, String second, int decide) {
-        set(new Text(first),new Text(second) , decide);
+    public ThirdJobKey(String first, String second, int decide , double pmi) {
+        set(new Text(first),new Text(second) , decide,pmi);
     }
 
-    public void set(Text first, Text second, int decide) {
+    public void set(Text first, Text second, int decide,double pmi) {
         this.first = first;
         this.second = second;
         this.decide = decide;
+        this.pmi = pmi;
     }
 
     public Text getFirst() {
@@ -64,10 +67,15 @@ public class ThirdJobKey implements WritableComparable<ThirdJobKey> {
         int dec = this.decide - o.decide;
         int first = this.first.toString().compareTo(o.first.toString());
         int second = this.second.toString().compareTo(o.second.toString());
+        double pmi = o.pmi - this.pmi;
+        int IPmi = 1;
+        if (pmi < 0) IPmi = -1;
         if(dec == 0) {
             if (first == 0)
-                return second;
-            return first;
+                if (second == 0) {
+                    return 0;
+                }
+            return IPmi;
         }
         return dec;
     }
@@ -76,12 +84,14 @@ public class ThirdJobKey implements WritableComparable<ThirdJobKey> {
         out.writeUTF(first.toString());
         out.writeUTF(second.toString());
         out.writeInt(decide);
+        out.writeDouble(pmi);
     }
 
     public void readFields(DataInput in) throws IOException {
         this.first = new Text(in.readUTF());
         this.second = new Text(in.readUTF());
         decide = in.readInt();
+        pmi = in.readDouble();
     }
 
     @Override

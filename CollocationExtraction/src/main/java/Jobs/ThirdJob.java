@@ -37,10 +37,10 @@ public class ThirdJob {
             if (Npmi > 1) Npmi = 1;
 
             // one for Decide counting
-            context.write(new ThirdJobKey(asr,asr,key.getDecide()),new DoubleWritable(Npmi));
+            context.write(new ThirdJobKey(asr,asr,key.getDecide(),0),new DoubleWritable(Npmi));
 
             // one for bigram counting
-            context.write(new ThirdJobKey(key.getFirst().toString(),key.getSecond().toString(),key.getDecide()),new DoubleWritable(Npmi));
+            context.write(new ThirdJobKey(key.getFirst().toString(),key.getSecond().toString(),key.getDecide(),Npmi),new DoubleWritable(Npmi));
 
         }
     }
@@ -77,23 +77,20 @@ public class ThirdJob {
         private Text text = new Text("");
 
         @Override
-        protected void setup(Context context) throws IOException, InterruptedException {
-            Minimal_pmi = Double.valueOf(context.getConfiguration().get("Minimal_pmi"));
-            Relative_minimal_pmi = Double.valueOf(context.getConfiguration().get("Relative_minimal_pmi"));
-        }
-
-        @Override
         protected void reduce(ThirdJobKey key, Iterable<DoubleWritable> values, Context context) throws IOException, InterruptedException {
             double Counter = 0;
 
             for (DoubleWritable value : values) {
                 Counter += value.get();
             }
+            Minimal_pmi = Double.valueOf(context.getConfiguration().get("Minimal_pmi"));
+            Relative_minimal_pmi = Double.valueOf(context.getConfiguration().get("Relative_minimal_pmi"));
 
             if(key.getFirst().toString().equals(asr)){
                 Curr_Relative_minimal_pmi = Counter;
             }else {
                 double calc_Relative_minimal_pmi = Counter/this.Curr_Relative_minimal_pmi;
+                text.set(String.valueOf(Counter));
                 if(Counter>Minimal_pmi)
                     context.write(key,text);
                 else if(calc_Relative_minimal_pmi>Relative_minimal_pmi)
@@ -103,6 +100,8 @@ public class ThirdJob {
     }
 
     public static void main(String[] args) throws IOException, ClassNotFoundException, InterruptedException {
+
+
         String add = args[0];
         String uuid = args[1];
         String Minimal_pmi = args[2];
@@ -111,9 +110,9 @@ public class ThirdJob {
         String output = "s3n://"+add+"/Output";
         String input = "s3n://"+add+"/steps/" + uuid + "/Job2";
         Configuration conf = new Configuration();
-        Job job = Job.getInstance(conf,"ThirdJob");
         conf.set("Minimal_pmi", Minimal_pmi);
         conf.set("Relative_minimal_pmi", Relative_minimal_pmi);
+        Job job = Job.getInstance(conf,"ThirdJob");
         job.setJarByClass(ThirdJob.class);//Jar class
         job.setPartitionerClass(ThirdJob.thirdPartitioner.class);
         job.setMapperClass(ThirdJob.ThirdMapper.class);//mapper
