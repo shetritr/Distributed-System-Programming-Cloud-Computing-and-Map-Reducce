@@ -57,7 +57,7 @@
              <configuration>
                  <archive>
                      <manifest>
-                         <mainClass>Jobs.SecondJob</mainClass>
+                         <mainClass>test.LoaclApp</mainClass>
                      </manifest>
                  </archive>
              </configuration>

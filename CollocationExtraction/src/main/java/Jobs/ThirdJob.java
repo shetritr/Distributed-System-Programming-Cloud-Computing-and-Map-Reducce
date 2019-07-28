@@ -118,7 +118,6 @@ public class ThirdJob {
         job.setMapperClass(ThirdJob.ThirdMapper.class);//mapper
         job.setReducerClass(ThirdJob.thirdReducer.class);//reducer
         job.setCombinerClass(ThirdJob.thirdCombiner.class);//combiner
-        job.setNumReduceTasks(1);//how many reduce tasks that we want
         job.setMapOutputKeyClass(ThirdJobKey.class);
         job.setMapOutputValueClass(DoubleWritable.class);
         job.setOutputKeyClass(ThirdJobKey.class);

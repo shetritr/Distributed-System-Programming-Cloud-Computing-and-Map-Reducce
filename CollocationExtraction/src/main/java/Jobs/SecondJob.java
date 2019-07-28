@@ -22,26 +22,36 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.HashMap;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class SecondJob {
 
     public static class SecondMapper extends Mapper<FirstJobKey, FirstJobValue, FirstJobKey, SecondJobValueMapper>{
         private AmazonS3 s3 = AmazonS3ClientBuilder.standard().withRegion(Regions.US_EAST_1).build();
         private String asr = "*";
+        private ConcurrentHashMap <String,Long> NsMap = new ConcurrentHashMap<String,Long> ();
 
         @Override
         protected void map(FirstJobKey key, FirstJobValue value, Context context) throws IOException, InterruptedException {
-            String bucketName = context.getConfiguration().get("NsPath");
-            S3Object object = s3.getObject(new GetObjectRequest(bucketName, String.valueOf(key.getDecide())));
-            long N_dec = readTextInputStream(object.getObjectContent());
+            if(!NsMap.containsKey(String.valueOf(key.getDecide()))){
+                UpdateMap(context.getConfiguration().get("NsPath"),String.valueOf(key.getDecide()));
+            }
+
             // now switch (w1,w2) => (w2,w1) ,for sorting by w2
             if(key.getFirst().toString().equals(asr)){  // when (*,w2)
                 context.write(new FirstJobKey(key.getSecond().toString(),key.getFirst().toString(),key.getDecide()),new SecondJobValueMapper(value.getCW1N()));
             }
             else{ // when (w1,w2)
-                context.write(new FirstJobKey(key.getSecond().toString(),key.getFirst().toString(),key.getDecide()),new SecondJobValueMapper(value.getCW1W2(),value.getCW1N(),N_dec));
+                context.write(new FirstJobKey(key.getSecond().toString(),key.getFirst().toString(),key.getDecide()),new SecondJobValueMapper(value.getCW1W2(),value.getCW1N(),NsMap.get(String.valueOf(key.getDecide()))));
             }
 
+        }
+
+        public void UpdateMap(String path, String FileName) throws IOException {
+            S3Object object = s3.getObject(new GetObjectRequest(path, FileName));
+            long N_dec = readTextInputStream(object.getObjectContent());
+            NsMap.put(FileName,N_dec);
         }
     }
 
@@ -93,12 +103,10 @@ public class SecondJob {
         job.setJarByClass(SecondJob.class);//Jar class
         job.setMapperClass(SecondJob.SecondMapper.class);//mapper
         job.setReducerClass(SecondJob.secondReducer.class);//reducer
-        job.setNumReduceTasks(4);//how many reduce tasks that we want
         job.setMapOutputKeyClass(FirstJobKey.class);
         job.setMapOutputValueClass(SecondJobValueMapper.class);
         job.setOutputKeyClass(FirstJobKey.class);
         job.setOutputValueClass(SecondJobValueReduce.class);
-        job.setInputFormatClass(SecondJobInputFormat.class);
         job.setInputFormatClass(SecondJobInputFormat.class);
 
         FileInputFormat.addInputPath(job,new Path(input));

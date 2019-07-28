@@ -46,7 +46,7 @@ public class LoaclApp {
 
         //
         String credent = credentialsProvider.getCredentials().getAWSAccessKeyId();
-        String add = ("Refael-And-Mhor-2-"+credent).toLowerCase();
+        String add = ("Refael-And-Mhor-"+credent).toLowerCase();
         String input ="s3://datasets.elasticmapreduce/ngrams/books/20090715/eng-us-all/2gram/data";// "s3n://" + add + "/input.txt";
 
         PutOnS3("uploads",add);

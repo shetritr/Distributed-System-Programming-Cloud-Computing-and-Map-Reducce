@@ -34,16 +34,32 @@ public class FirstJob {
 
 
         public void map(Object key, Text value, Context context) throws IOException, InterruptedException {
-            StringTokenizer st = new StringTokenizer(value.toString());// split the value by " \t\n\r\f"
-            if (!st.hasMoreTokens()) return;
-            String W1 = st.nextToken().toLowerCase(); // word 1
-            if (!st.hasMoreTokens()) return;
-            String W2 = st.nextToken().toLowerCase();
-            if (!st.hasMoreTokens()) return; // word 2
-            int dec = Integer.parseInt(st.nextToken());
+
+            String valueSplited[] = value.toString().split("\t");
+            String ngram[] = valueSplited[0].split(" ");
+            if(ngram.length != 2) return;
+            //Replacing all non-alphanumeric characters with empty strings
+            String W1 = ngram[0].replaceAll("[^A-Za-z0-9]","").toLowerCase();
+            String W2 = ngram[1].replaceAll("[^A-Za-z0-9]","").toLowerCase();
+            if (W1.length() == 0 || W2.length() == 0) return;;
+            //set occurrences
+            long count  = Long.valueOf(Long.parseLong(valueSplited[2]));
+            //set decade
+            int dec = Integer.parseInt(valueSplited[1]);
             int dec2 = dec - dec%10; // calc the decide
-            if (!st.hasMoreTokens()) return;
-            long count  = Long.valueOf(st.nextToken());
+
+
+
+//            StringTokenizer st = new StringTokenizer(value.toString());// split the value by " \t\n\r\f"
+//            if (!st.hasMoreTokens()) return;
+//            String W1 = st.nextToken().toLowerCase(); // word 1
+//            if (!st.hasMoreTokens()) return;
+//            String W2 = st.nextToken().toLowerCase();
+//            if (!st.hasMoreTokens()) return; // word 2
+//            int dec = Integer.parseInt(st.nextToken());
+//            int dec2 = dec - dec%10; // calc the decide
+//            if (!st.hasMoreTokens()) return;
+//            long count  = Long.valueOf(st.nextToken());
 
             // for each pair we write 4 <key,Value>
             // 1. for count the N 2-gram we write <*,*>
@@ -159,12 +175,12 @@ public class FirstJob {
         job.setMapperClass(firstMapper.class);//mapper
         job.setReducerClass(FirstJob.firstReducer.class);//reducer
         job.setCombinerClass(FirstJob.firstCombiner.class);//combiner
-        job.setNumReduceTasks(4);//how many reduce tasks that we want
         job.setMapOutputKeyClass(FirstJobKey.class);
         job.setMapOutputValueClass(LongWritable.class);
         job.setOutputKeyClass(FirstJobKey.class);
         job.setOutputValueClass(FirstJobValue.class);
         job.setInputFormatClass(SequenceFileInputFormat.class);
+//        job.setInputFormatClass(TextInputFormat.class);
 
         FileInputFormat.addInputPath(job,new Path(input));
         FileOutputFormat.setOutputPath(job, new Path(output));
